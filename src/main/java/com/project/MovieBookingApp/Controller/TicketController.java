@@ -21,6 +21,7 @@ import com.project.MovieBookingApp.model.Movie;
 import com.project.MovieBookingApp.model.Ticket;
 import com.project.MovieBookingApp.response.ResponseHandler;
 import com.project.MovieBookingApp.services.MovieService;
+import com.project.MovieBookingApp.services.PublisherService;
 import com.project.MovieBookingApp.services.TicketService;
 
 @CrossOrigin
@@ -34,6 +35,9 @@ public class TicketController
 	@Autowired
 	private TicketService ts;
 	
+	@Autowired
+	private PublisherService publishservice;
+	
 	@GetMapping("/getTickets")
 	public ResponseEntity<?> getAllMovie()
 	{
@@ -41,9 +45,10 @@ public class TicketController
 		System.out.println(ticketlist);
 		if(ticketlist !=null)
 		{
-			
+			publishservice.setTemp( "All tickets are fetched successfully");
 		return ResponseHandler.generateResponse("Succesfully fetched the ticketlist", HttpStatus.OK, ticketlist);
 		}
+		publishservice.setTemp( " tickets lists are not fetched successfully");
 		return new ResponseEntity<String>("ticketlist is empty", HttpStatus.NO_CONTENT);
 		
 	}
@@ -55,11 +60,13 @@ public class TicketController
 		
 		System.out.println(ticketList);
 		if(ticketList !=null)
-		{			
+		{	
+			publishservice.setTemp( "All tickets are fetched successfully");
 			CacheControl cacheControlObj = CacheControl.maxAge(30, TimeUnit.MINUTES);
 			return ResponseEntity.ok().cacheControl(cacheControlObj)
 					.body(ResponseHandler.generateResponse("Succesfully fetched the Ticketlist", HttpStatus.OK, ticketList));
 		}
+		publishservice.setTemp( " tickets lists are not fetched successfully");
 		return new ResponseEntity<String>("TicketList is empty", HttpStatus.NO_CONTENT);
 		
 	}
@@ -71,11 +78,13 @@ public class TicketController
 		
 		System.out.println(ticketList);
 		if(ticketList !=null)
-		{			
+		{	
+			publishservice.setTemp( " Movie tickets fetched successfully");
 			CacheControl cacheControlObj = CacheControl.maxAge(30, TimeUnit.MINUTES);
 			return ResponseEntity.ok().cacheControl(cacheControlObj)
 					.body(ResponseHandler.generateResponse("Succesfully fetched the Ticketlist", HttpStatus.OK, ticketList));
 		}
+		publishservice.setTemp( " Movie TicketList is not fetched ");
 		return new ResponseEntity<String>("TicketList is empty", HttpStatus.NO_CONTENT);
 		
 	}
@@ -98,12 +107,14 @@ public class TicketController
 			movieexists.setSeatsAvailable(avaseats);
 			movieexists.setSeatsBooked(totalbooked);
 			if(ts.addTicket(ticket) && ms.updateMovie(movieexists))
-			{
+			{	
+				publishservice.setTemp(ticket.getTransactionId() + " Movie tickets booked successfully");
 				return new ResponseEntity<Ticket>(ticket, HttpStatus.CREATED);
 			}
 			
 			
 		}
+		publishservice.setTemp( " Movie tickets cannot be Added");	
 		return new ResponseEntity<String>("Ticket cannot be added", HttpStatus.INTERNAL_SERVER_ERROR);
 		
 	}
@@ -138,10 +149,11 @@ public class TicketController
 	public ResponseEntity<?> deleteTicket(@PathVariable ("tid") int tid)
 	{
 		if(ts.deleteTicket(tid))
-		{
+		{	
+			publishservice.setTemp(" Movie ticket Deleted successfully");
 			return new ResponseEntity<String>("Ticket got deleted successfully",HttpStatus.OK);
 		}
-		
+		publishservice.setTemp(" Movie ticket did not get delete");
 		return new ResponseEntity<String>("Ticket did not get deleted ",HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
@@ -149,10 +161,11 @@ public class TicketController
 	public ResponseEntity<?> deleteTicketByMovieId(@PathVariable ("mid") int mid)
 	{
 		if(ts.deleteTicketByMovieId(mid))
-		{
+		{	
+			publishservice.setTemp( " Movie tickets deleted successfully");	
 			return new ResponseEntity<String>("Ticket got deleted successfully",HttpStatus.OK);
 		}
-		
+		publishservice.setTemp( " Movie tickets notdeleted successfully");	
 		return new ResponseEntity<String>("Ticket did not get deleted ",HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	

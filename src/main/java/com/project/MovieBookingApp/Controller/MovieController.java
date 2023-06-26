@@ -24,8 +24,8 @@ import com.project.MovieBookingApp.model.Movie;
 import com.project.MovieBookingApp.model.Ticket;
 import com.project.MovieBookingApp.repository.TicketRepository;
 import com.project.MovieBookingApp.response.ResponseHandler;
-import com.project.MovieBookingApp.services.DataPublisherServiceImpl;
 import com.project.MovieBookingApp.services.MovieService;
+import com.project.MovieBookingApp.services.PublisherService;
 import com.project.MovieBookingApp.services.TicketService;
 
 @CrossOrigin
@@ -37,9 +37,15 @@ public class MovieController {
 	
 	@Autowired
 	private MovieService movieService;
+	
+	@Autowired
 	private TicketService ticketService;
+	
+	@Autowired
 	TicketRepository ticketRepo;
-	DataPublisherServiceImpl datapublisher;
+	
+	@Autowired
+	private PublisherService publishservice;
 	
 	
 	@GetMapping("/getAllMovies")
@@ -62,11 +68,11 @@ public class MovieController {
 	{
 		if(movieService.addMovie(movie)!=null)
 		{	
-			//datapublisher.setTemp(" Added Successfully");	
+			publishservice.setTemp(movie.getMovieName()+" Added Successfully");	
 			return new ResponseEntity<Movie>(movie, HttpStatus.CREATED);
 		}
 		
-		//datapublisher.setTemp(movie.getMovieName()+"not added");
+		publishservice.setTemp(movie.getMovieName()+"not added");
 		return new ResponseEntity<String>("movie object is null", HttpStatus.NO_CONTENT);
 	}
 	
@@ -77,13 +83,13 @@ public class MovieController {
 		if(movieexists !=null) {
 		if(movieService.deleteMovie(mid))
 		{	
-			//int movieId_fk = mid;
-			//ticketService.deleteTicketByMovieId(movieId_fk);
+			int movieId_fk = mid;
+			ticketService.deleteTicketByMovieId(movieId_fk);
 			//ticketRepo.deleteTicketByMovieId(movieId_fk);
-			datapublisher.setTemp(mid+" Deleted Successfully");	
+			publishservice.setTemp(mid +" Deleted Successfully");	
 			return new ResponseEntity<String>("Movie got deleted successfully",HttpStatus.OK);
 		}
-		datapublisher.setTemp(mid+" NOT deleted Successfully");
+		publishservice.setTemp(mid+" NOT deleted Successfully");
 		return new ResponseEntity<String>("Movie did not get deleted ",HttpStatus.INTERNAL_SERVER_ERROR);}
 		
 		else {return new ResponseEntity<String>("Movie did not get deleted ",HttpStatus.INTERNAL_SERVER_ERROR);}
@@ -93,10 +99,12 @@ public class MovieController {
 	public ResponseEntity<?> updateMovie(@RequestBody Movie movie)
 	{
 		if(movieService.updateMovie(movie))
-		{
+		{	
+			publishservice.setTemp(movie.getMovieName() +" Updated Successfully");
 			System.out.println("updateddd movie");
 			return new ResponseEntity<String>("Movie got updated successfully",HttpStatus.OK);
 		}
+		publishservice.setTemp(movie.getMovieName() +" Update Failure");
 		System.out.println("updateddd movie");
 		return new ResponseEntity<String>("Movie updation failed",HttpStatus.INTERNAL_SERVER_ERROR);
 	}
@@ -106,9 +114,11 @@ public class MovieController {
 	{
 		Movie movieexists = movieService.getMovieById(mid);
 		if(movieexists !=null)
-		{
+		{	
+			publishservice.setTemp(movieexists.getMovieId() +" Got movie record Successfully");
 			return new ResponseEntity<Movie>(movieexists, HttpStatus.OK);
 		}
+		publishservice.setTemp(mid +" Unable to get movie record");
 		return new ResponseEntity<String>("Movie record does not exist",HttpStatus.NO_CONTENT);
 	}
 	
